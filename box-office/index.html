@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&family=Roboto:wght@100;300;400;500;700;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&family=Roboto:wght@100;300;400;500;700;900&family=Fredoka+One&display=swap"
       rel="stylesheet"
     />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
@@ -25,59 +25,157 @@
   </head>
   <body>
     <main id="main">
-      <div class="mainBox">
-        <div class="left">
-          BOX <br />
-          OFFICE
-        </div>
-        <div class="right">
-          <div class="resultDate"></div>
-          <div class="btns">
-            <span class="btn">무슨버튼</span>
-            <span class="btn">날짜선택</span>
+      <div class="container">
+        <div class="mainBox">
+          <div class="left">
+            BOX <br />
+            OFFICE
+          </div>
+          <div class="right">
+            <div class="resultDate"></div>
+            <div class="btns">
+              <span class="btn"><span class="material-icons"> play_arrow </span>재생</span>
+              <span class="btn"><span class="material-icons"> shuffle </span>임의재생</span>
+              <span class="material-icons whatDay">more_horiz</span>
+              <div class="calendar">
+                <div class="header">
+                  <button class="prevMonth"><span class="material-icons"> chevron_left </span></button>
+                  <div class="monthBox">
+                    <span class="year">2022</span>
+                    <span class="month">07</span>
+                  </div>
+                  <button class="nextMonth"><span class="material-icons"> chevron_right </span></button>
+                </div>
+                <div class="days">
+                  <ul>
+                    <li class="sun"><span>sun</span></li>
+                    <li><span>mon</span></li>
+                    <li><span>tue</span></li>
+                    <li><span>wed</span></li>
+                    <li><span>thu</span></li>
+                    <li><span>fri</span></li>
+                    <li class="sat"><span>sat</span></li>
+                  </ul>
+                </div>
+                <div class="dates">
+                  <ul></ul>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-      <div id="boxOffice">
-        <div class="menu"></div>
-        <ul class="list">
-          <!-- <li class="movie">
-            <div class="rank">rank</div>
-            <div class="incDec">rankInten</div>
-            <div class="poster">
-              <a href=""><img src="" alt="" /></a>
-            </div>
-            <div class="descBox">
-              <div class="title">movieNm</div>
-              <div class="openDate">openDt</div>
-            </div>
-            <div class="audience">audiAcc</div>
-            <div class="more">
-              <a href=""><span class="material-icons">more_vert</span></a>
-            </div>
-          </li> -->
-        </ul>
+        <div id="boxOffice">
+          <ul class="list">
+            <!-- <li class="movie">
+              <div class="rank">rank</div>
+              <div class="incDec">rankInten</div>
+              <div class="poster">
+                <a href=""><img src="" alt="" /></a>
+              </div>
+              <div class="descBox">
+                <div class="title">movieNm</div>
+                <div class="openDate">openDt</div>
+              </div>
+              <div class="audience">audiAcc</div>
+              <div class="more">
+                <a href=""><span class="material-icons">more_vert</span></a>
+              </div>
+            </li> -->
+          </ul>
+        </div>
       </div>
     </main>
   </body>
   <script>
     const list = $("#boxOffice .list");
-    const now = new Date();
     const addZero = function (num) {
       return num < 10 ? "0" + num : "" + num;
     };
+    const resultDate = $(".resultDate");
+    const whatDay = $(".whatDay");
+    const now = new Date();
     const year = now.getFullYear();
     const month = addZero(now.getMonth() + 1);
     const date = addZero(now.getDate() - 1);
     const yesterday = `${year}${month}${date}`;
-    const resultDate = $(".resultDate");
-    resultDate.html(`${year}년 ${month}월 ${date}일`);
-    const movieChart = function (yesterday) {
+
+    let currentNow = new Date();
+    const calendar = $(".calendar");
+    const btnPrevMonth = $(".calendar .prevMonth");
+    const btnNextMonth = $(".calendar .nextMonth");
+    const makeCalendar = function (year, month) {
+      const datesUL = $(".calendar .dates ul");
+      const txtYear = $(".calendar .header .year");
+      const txtMonth = $(".calendar .header .month");
+      const firstDate = new Date(year, month, 1);
+      // 달력 만들때 달의 1일을 기준으로 한다.
+      const leapYear = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      const notLeapYear = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+      let selectedYear = null;
+      let tempCal = "";
+      let count = 0;
+
+      if (firstDate.getFullYear() % 4 === 0) {
+        if (firstDate.getFullYear() % 100 === 0) {
+          selectedYear = notLeapYear;
+        } else {
+          selectedYear = leapYear;
+        }
+      } else {
+        selectedYear = notLeapYear;
+      }
+      if (firstDate.getFullYear() % 400 === 0) {
+        selectedYear = leapYear;
+      }
+      const tempMonth = firstDate.getMonth() + 1;
+      txtYear.text(firstDate.getFullYear());
+      txtMonth.text(tempMonth < 10 ? "0" + tempMonth : tempMonth);
+      for (let i = 0; i < 42; i++) {
+        if (i < firstDate.getDay()) {
+          tempCal += `<li class="blank"><span></span></li>`;
+        } else {
+          count++;
+          if (now.getFullYear() === firstDate.getFullYear() && now.getMonth() === firstDate.getMonth() && now.getDate() - 1 === count) {
+            tempCal += `<li class="selected" data-year="${firstDate.getFullYear()}" data-month="${
+              firstDate.getMonth() + 1
+            }" data-date="${count}"><span>${count}</span></li>`;
+          } else {
+            tempCal += `<li data-year="${firstDate.getFullYear()}" data-month="${
+              firstDate.getMonth() + 1
+            }" data-date="${count}"><span>${count}</span></li>`;
+          }
+        }
+        if (count >= selectedYear[firstDate.getMonth()]) {
+          break;
+        }
+      }
+      datesUL.html(tempCal);
+    };
+
+    makeCalendar(now.getFullYear(), now.getMonth());
+    btnPrevMonth.on("click", function () {
+      currentNow = new Date(currentNow.getFullYear(), currentNow.getMonth() - 1);
+      makeCalendar(currentNow.getFullYear(), currentNow.getMonth());
+    });
+    btnNextMonth.on("click", function () {
+      currentNow = new Date(currentNow.getFullYear(), currentNow.getMonth() + 1);
+      makeCalendar(currentNow.getFullYear(), currentNow.getMonth());
+    });
+    $(".calendar").on("click", ".dates li", function () {
+      console.log(typeof $(this).data("month"));
+      const selectedDate = $(this).data("year") + addZero($(this).data("month")) + addZero($(this).data("date"));
+      $(this).addClass("selected").siblings().removeClass("selected");
+      movieChart(selectedDate);
+      resultDate.html(selectedDate);
+    });
+
+    const movieChart = function (selectedDate) {
       $.ajax({
         url: "http://www.kobis.or.kr/kobisopenapi/webservice/rest/boxoffice/searchDailyBoxOfficeList.json",
         data: {
           key: "9f9b8a1b54c6aeb13f9505b1810413b8",
-          targetDt: yesterday,
+          targetDt: selectedDate,
         },
       }).done(function (response) {
         // console.log(response);
@@ -87,7 +185,8 @@
           const randomColor = Math.floor(Math.random() * 256 * 256 * 256)
             .toString(16)
             .padStart(6, 0);
-          tempHtml += `<li class="movie">
+          if (item.rankInten > 0) {
+            tempHtml += `<li class="movie">
             <div class="favorite">
               <span class="material-icons border"> favorite_border </span>
               <span class="material-icons filled">favorite</span>
@@ -95,23 +194,76 @@
               <div class="poster" style="background-color:#${randomColor}; opacity:0.5;">
                 <a href=""><span class="material-icons"> play_arrow </span></a>
               </div>
-              <div class="rank">${item.rank}</div>
-              <div class="incDec">${item.rankInten}</div>
+              <div class="number">
+                <div class="rank">${item.rnum}</div>
+                <div class="incDec dropUp"><span class="material-icons">arrow_drop_up</span></div>
+              </div>
               <div class="descBox">
-                <div class="title">${item.movieNm}</div>
-                <div class="openDate">${item.openDt}</div>
+                <a href="">
+                  <div class="title">${item.movieNm}</div>
+                  <div class="openDate">${item.openDt}</div>
+                </a>
               </div>
               <div class="audience">${item.audiAcc}</div>
               <div class="more">
-                <a href=""><span class="material-icons">more_vert</span></a>
+                <a href=""><span class="material-icons">more_horiz</span></a>
               </div>
             </li>`;
+          } else if (item.rankInten < 0) {
+            tempHtml += `<li class="movie">
+            <div class="favorite">
+              <span class="material-icons border"> favorite_border </span>
+              <span class="material-icons filled">favorite</span>
+            </div>
+              <div class="poster" style="background-color:#${randomColor}; opacity:0.5;">
+                <a href=""><span class="material-icons"> play_arrow </span></a>
+              </div>
+              <div class="number">
+                <div class="rank">${item.rnum}</div>
+                <div class="incDec dropDown"><span class="material-icons">arrow_drop_down</span></div>
+              </div>
+              <div class="descBox">
+                <a href="">
+                  <div class="title">${item.movieNm}</div>
+                  <div class="openDate">${item.openDt}</div>
+                </a>
+              </div>
+              <div class="audience">${item.audiAcc}</div>
+              <div class="more">
+                <a href=""><span class="material-icons">more_horiz</span></a>
+              </div>
+            </li>`;
+          } else {
+            tempHtml += `<li class="movie">
+                <div class="favorite">
+                  <span class="material-icons border"> favorite_border </span>
+                  <span class="material-icons filled">favorite</span>
+                </div>
+                  <div class="poster" style="background-color:#${randomColor}; opacity:0.5;">
+                    <a href=""><span class="material-icons"> play_arrow </span></a>
+                  </div>
+                  <div class="number">
+                    <div class="rank">${item.rnum}</div>
+                    <div class="incDec"><span class="material-icons remove">remove</span></div>
+                  </div>
+                  <div class="descBox">
+                    <a href="">
+                      <div class="title">${item.movieNm}</div>
+                      <div class="openDate">${item.openDt}</div>
+                    </a>
+                  </div>
+                  <div class="audience">${item.audiAcc}</div>
+                  <div class="more">
+                    <a href=""><span class="material-icons">more_horiz</span></a>
+                  </div>
+                </li>`;
+          }
           list.html(tempHtml);
         });
       });
     };
     movieChart(yesterday);
-
+    resultDate.html(yesterday);
     $("#boxOffice").on("click", ".favorite .border", function () {
       $(this).addClass("off");
       $(this).siblings().addClass("on");
@@ -119,6 +271,11 @@
     $("#boxOffice").on("click", ".favorite .filled", function () {
       $(this).removeClass("on");
       $(this).siblings().removeClass("off");
+    });
+
+    whatDay.on("click", function () {
+      console.log("click");
+      calendar.toggleClass("show");
     });
   </script>
 </html>
