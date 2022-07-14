@@ -1,0 +1,218 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gallery</title>
+    <link rel="icon" href="" type="image/x-icon" />
+    <link rel="stylesheet" href="css/reset.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&family=Roboto+Slab:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/fancybox.css" />
+
+    <script src="js/jquery-3.6.0.min.js"></script>
+    <script src="js/dayjs.min.js"></script>
+    <script src="js/imagesloaded.pkgd.js"></script>
+    <script src="js/isotope.pkgd.min.js"></script>
+    <script src="js/greensock/gsap.min.js"></script>
+    <script src="js/fancybox.umd.js"></script>
+    <script src="js/chart.min.js"></script>
+  </head>
+  <body>
+    <header id="header">
+      <h1><strong>COVID-19 Chart</strong></h1>
+    </header>
+    <main id="main">
+      <div class="coronaInfo">
+        <canvas id="coronaChart"></canvas>
+      </div>
+      <div class="whatDay"><input type="text" name="whatDay" readonly /></div>
+      <div class="calendar">
+        <div class="header">
+          <button class="prevMonth"><span class="material-icons"> arrow_back_ios_new </span></button>
+          <div class="monthBox">
+            <span class="year">2022</span>
+            <span class="month">07</span>
+          </div>
+          <button class="nextMonth"><span class="material-icons"> arrow_forward_ios </span></button>
+        </div>
+        <div class="days">
+          <ul>
+            <li class="sun"><span>Sun</span></li>
+            <li><span>Mon</span></li>
+            <li><span>Tue</span></li>
+            <li><span>Wed</span></li>
+            <li><span>Thu</span></li>
+            <li><span>Fri</span></li>
+            <li><span>Sat</span></li>
+          </ul>
+        </div>
+        <div class="dates">
+          <ul></ul>
+        </div>
+      </div>
+    </main>
+  </body>
+  <script>
+    const now = new Date();
+    let currentNow = new Date();
+    const prevMonth = $(".prevMonth");
+    const nextMonth = $(".nextMonth");
+    const whatDay = $(".whatDay");
+    const whatDayTxt = $("input[name=whatDay]");
+    const calendar = $(".calendar");
+    const makeCalendar = function (year, month) {
+      const datesUL = $(".dates ul");
+      const txtYear = $(".calendar .header .year");
+      const txtMonth = $(".calendar .header .month");
+      const firstDate = new Date(year, month, 1);
+      const leapYear = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      const notLeapYear = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+      let selectedYear = null;
+      let tempHtml = "";
+      let count = 0;
+
+      if (firstDate.getFullYear() % 4 === 0) {
+        if (firstDate.getFullYear() % 100 === 0) {
+          selectedYear = notLeapYear;
+        } else {
+          selectedYear = leapYear;
+        }
+      } else {
+        selectedYear = notLeapYear;
+      }
+
+      if (firstDate.getFullYear() % 400 === 0) {
+        selectedYear = leapYear;
+      }
+      //달력 만들때 달의 1일을 기준으로 한다
+      //앞에 빈공간을 기준으로 1일을 시작하기 위해서 첫날의 .getDay() 구하면 앞에 몇칸을 비울지 정할 수 있음
+      const tempMonth = firstDate.getMonth() + 1;
+      txtYear.text(firstDate.getFullYear());
+      txtMonth.text(tempMonth < 10 ? "0" + tempMonth : tempMonth);
+      for (let i = 0; i < 42; i++) {
+        if (i < firstDate.getDay()) {
+          tempHtml += `<li class="blank"><span></span></li>`;
+        } else {
+          count++;
+          if (now.getFullYear() === firstDate.getFullYear() && now.getMonth() === firstDate.getMonth() && now.getDate() === count) {
+            tempHtml += `<li class="today" data-year="${firstDate.getFullYear()}" data-month="${
+              firstDate.getMonth() + 1
+            }" data-date="${count}"><span>${count}</span></li>`;
+          } else {
+            tempHtml += `<li data-year="${firstDate.getFullYear()}" data-month="${
+              firstDate.getMonth() + 1
+            }" data-date="${count}"><span>${count}</span></li>`;
+          }
+        }
+        if (count >= selectedYear[firstDate.getMonth()]) {
+          break;
+          //반복문 빠져나갈 때 쓰는
+        }
+      }
+      datesUL.html(tempHtml);
+    };
+
+    makeCalendar(now.getFullYear(), now.getMonth());
+    prevMonth.on("click", function () {
+      currentNow = new Date(currentNow.getFullYear(), currentNow.getMonth() - 1);
+      makeCalendar(currentNow.getFullYear(), currentNow.getMonth());
+    });
+    nextMonth.on("click", function () {
+      currentNow = new Date(currentNow.getFullYear(), currentNow.getMonth() + 1);
+      makeCalendar(currentNow.getFullYear(), currentNow.getMonth());
+    });
+
+    $(".calendar").on("click", ".dates li", function () {
+      const selectedDate = $(this).data("year") + addZero($(this).data("month")) + addZero($(this).data("date"));
+      $(this).addClass("selected").siblings().removeClass("selected");
+      loadCorona(selectedDate);
+      whatDayTxt.attr("value", $(this).data("year") + "/" + addZero($(this).data("month")) + "/" + addZero($(this).data("date")));
+    });
+
+    whatDay.on("click", function () {
+      calendar.toggleClass("show");
+    });
+
+    const ctx = document.querySelector("#coronaChart").getContext("2d");
+    let coronaChart = null;
+    const loadCorona = function (whatDay) {
+      $.ajax({
+        url: "http://openapi.data.go.kr/openapi/service/rest/Covid19/getCovid19SidoInfStateJson",
+        data: {
+          ServiceKey: "4ihrQEPGr6sY9+Jl6/7u8972QQ9wBYPIcuSBZLGsjPPpeabDAwnGc1Iwq5S7oytSjyZ7D0+gBwySMUX0b3vFTw==",
+          _type: "json",
+          startCreateDt: whatDay,
+          endCreateDt: whatDay,
+        },
+      }).done(function (response) {
+        // console.log(response.response.body.items.item);
+        const coronaList = response.response.body.items.item;
+        const sidoList = [];
+        const incDecList = [];
+        //배열
+        $.each(coronaList, function (idx, item) {
+          sidoList.push(item.gubun);
+          incDecList.push(item.incDec);
+        });
+        if (coronaChart !== null) {
+          coronaChart.destroy();
+        }
+        coronaChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: sidoList,
+            datasets: [
+              {
+                label: "Corona",
+                data: incDecList,
+                backgroundColor: [
+                  "rgba(255, 99, 132, 0.2)",
+                  "rgba(54, 162, 235, 0.2)",
+                  "rgba(255, 206, 86, 0.2)",
+                  "rgba(75, 192, 192, 0.2)",
+                  "rgba(153, 102, 255, 0.2)",
+                  "rgba(255, 159, 64, 0.2)",
+                ],
+                borderColor: [
+                  "rgba(255, 99, 132, 1)",
+                  "rgba(54, 162, 235, 1)",
+                  "rgba(255, 206, 86, 1)",
+                  "rgba(75, 192, 192, 1)",
+                  "rgba(153, 102, 255, 1)",
+                  "rgba(255, 159, 64, 1)",
+                ],
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true,
+              },
+            },
+            plugins: {
+              legend: {
+                // position: "top",
+                display: false,
+              },
+            },
+          },
+        });
+      });
+    };
+    const addZero = function (num) {
+      return num < 10 ? "0" + num : "" + num;
+    };
+    // loadCorona(selectedDate);
+  </script>
+</html>

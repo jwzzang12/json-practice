@@ -1,0 +1,145 @@
+@import "vars";
+@import "mixin";
+
+body {
+  font-family: "Roboto Slab", "Noto Sans KR", serif;
+  font-size: $font-normal;
+  color: #111;
+  //prettier-ignore
+
+  background-color: rgb(39, 39, 39);
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button {
+  border: none;
+  outline: none;
+  background: none;
+}
+#header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 60px;
+  z-index: 99;
+  overflow: hidden;
+  box-shadow: 0 5px 5px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  // position: fixed;
+  h1 {
+    font-size: 20px;
+    font-weight: 300;
+    text-transform: uppercase;
+    @include longShadow(#ccc, 50);
+    strong {
+      font-weight: 700;
+    }
+  }
+}
+#main {
+  display: flex;
+  // justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+#coronaChart {
+  width: 1000px;
+  height: 600px;
+  // background-color: #000;
+  margin-left: 200px;
+}
+.whatDay {
+  position: absolute;
+  top: 100px;
+  right: 100px;
+
+  box-shadow: 5px 5px 5px rgab(0, 0, 0, 0.2);
+  input[type="text"] {
+    width: 300px;
+    padding: 20px;
+    border: none;
+    outline: none;
+    border-radius: 10px;
+    height: 30px;
+    color: #000;
+    font-size: 20px;
+    font-family: inherit;
+    text-align: center;
+  }
+}
+.calendar {
+  position: absolute;
+  top: 180px;
+  right: 100px;
+  width: 300px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 5px 5px 5px rgab(0, 0, 0, 0.2);
+  display: none;
+  &.show {
+    display: block;
+  }
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.days {
+  margin: 10px 0;
+  text-transform: uppercase;
+  .sun span {
+    color: rgb(192, 45, 45);
+  }
+}
+.days,
+.dates {
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 14px;
+    font-weight: 700;
+    li {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: calc(100% / 7 - 6px);
+      position: relative;
+      margin: 3px;
+      &:before {
+        content: "";
+        display: block;
+        padding-top: 100%;
+      }
+      span {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 100px;
+      }
+      &.blank span {
+        background: none;
+        pointer-events: none;
+      }
+    }
+  }
+}
+.dates {
+  li {
+    &.today span {
+      background-color: #0f0;
+    }
+    &.selected span {
+      background-color: #0ff;
+    }
+  }
+}
